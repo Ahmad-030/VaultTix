@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>VaultTix – Privacy Policy</title>
+  <style>
+    :root {
+      --bg:        #080B14;
+      --surface:   #0F1629;
+      --card:      #141B2D;
+      --border:    #1E2A42;
+      --primary:   #6C63FF;
+      --accent:    #00D4FF;
+      --green:     #00E5A0;
+      --orange:    #FF6B35;
+      --pink:      #FF4B8B;
+      --text:      #F0F4FF;
+      --muted:     #8A9BC4;
+      --dim:       #4A5A7A;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+      padding: 0 0 48px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Hero banner ── */
+    .hero {
+      background: linear-gradient(145deg, #0D1128 0%, #0F1629 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 32px 20px 28px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -60px; left: 50%; transform: translateX(-50%);
+      width: 260px; height: 260px;
+      background: radial-gradient(circle, rgba(108,99,255,.18) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 64px; height: 64px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #6C63FF, #00D4FF);
+      box-shadow: 0 12px 32px rgba(108,99,255,.45);
+      font-size: 28px;
+      margin-bottom: 14px;
+    }
+    .hero h1 {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -.4px;
+      background: linear-gradient(135deg, #6C63FF, #00D4FF);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 6px;
+    }
+    .hero p {
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .badge {
+      display: inline-block;
+      margin-top: 12px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .6px;
+      background: rgba(108,99,255,.12);
+      border: 1px solid rgba(108,99,255,.35);
+      color: #8B85FF;
+    }
+
+    /* ── Section list ── */
+    .sections { padding: 20px 16px 0; }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px;
+      margin-bottom: 14px;
+      position: relative;
+      overflow: hidden;
+    }
+    .card::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 3px; height: 100%;
+      border-radius: 18px 0 0 18px;
+      background: var(--accent-color, var(--primary));
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .card-icon {
+      width: 38px; height: 38px;
+      border-radius: 11px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+      background: var(--icon-bg, rgba(108,99,255,.12));
+    }
+    .card h2 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .card p {
+      color: var(--muted);
+      font-size: 13.5px;
+      line-height: 1.65;
+      padding-left: 2px;
+    }
+
+    /* Color variants */
+    .c-purple { --accent-color: #6C63FF; --icon-bg: rgba(108,99,255,.12); }
+    .c-cyan   { --accent-color: #00D4FF; --icon-bg: rgba(0,212,255,.10); }
+    .c-green  { --accent-color: #00E5A0; --icon-bg: rgba(0,229,160,.10); }
+    .c-orange { --accent-color: #FF6B35; --icon-bg: rgba(255,107,53,.10); }
+    .c-pink   { --accent-color: #FF4B8B; --icon-bg: rgba(255,75,139,.10); }
+    .c-blue   { --accent-color: #4B9EFF; --icon-bg: rgba(75,158,255,.10); }
+
+    /* ── Contact card ── */
+    .contact-card {
+      background: linear-gradient(135deg, rgba(108,99,255,.12), rgba(0,212,255,.08));
+      border: 1px solid rgba(108,99,255,.25);
+      border-radius: 18px;
+      padding: 20px;
+      margin: 0 16px 14px;
+      text-align: center;
+    }
+    .contact-card .label {
+      font-size: 12px;
+      color: var(--dim);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      font-weight: 600;
+    }
+    .contact-card .email {
+      font-size: 15px;
+      font-weight: 700;
+      color: #8B85FF;
+      letter-spacing: .2px;
+    }
+
+    /* ── Info row chips ── */
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 10px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .chip span { font-size: 13px; }
+
+    /* ── Footer ── */
+    .footer {
+      text-align: center;
+      color: var(--dim);
+      font-size: 12px;
+      padding: 24px 20px 0;
+      line-height: 1.8;
+    }
+    .footer strong { color: var(--muted); }
+  </style>
+</head>
+<body>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-icon">🔐</div>
+    <h1>Privacy Policy</h1>
+    <p>How VaultTix handles your data</p>
+    <div class="badge">Last updated: January 2024</div>
+  </div>
+
+  <!-- Quick chips -->
+  <div class="sections" style="padding-bottom:0">
+    <div class="chips">
+      <div class="chip"><span>🌐</span> 100% Offline</div>
+      <div class="chip"><span>🚫</span> No Analytics</div>
+      <div class="chip"><span>🔒</span> AES-256</div>
+      <div class="chip"><span>📵</span> Zero Permissions</div>
+    </div>
+  </div>
+
+  <!-- Policy sections -->
+  <div class="sections">
+
+    <div class="card c-purple">
+      <div class="card-header">
+        <div class="card-icon">🗄️</div>
+        <h2>Data Storage</h2>
+      </div>
+      <p>All your data is stored exclusively on your device. Nothing is transmitted to external servers, cloud services, or third parties. Your notes, PIN, and encryption keys <strong style="color:var(--text)">never leave your device</strong>.</p>
+    </div>
+
+    <div class="card c-cyan">
+      <div class="card-header">
+        <div class="card-icon">🔒</div>
+        <h2>Encryption</h2>
+      </div>
+      <p>Every note is encrypted with <strong style="color:var(--text)">AES-256-CBC</strong> before being written to storage. Your PIN is hashed using <strong style="color:var(--text)">SHA-256 + unique salt</strong>. Even with direct storage access, your data remains fully protected.</p>
+    </div>
+
+    <div class="card c-green">
+      <div class="card-header">
+        <div class="card-icon">🛡️</div>
+        <h2>Zero Permissions</h2>
+      </div>
+      <p>VaultTix requests <strong style="color:var(--text)">no risky permissions</strong> — no camera, no contacts, no location, no internet. Biometric authentication (optional) is processed entirely by your device's secure enclave. No biometric data is ever stored by the app.</p>
+    </div>
+
+    <div class="card c-orange">
+      <div class="card-header">
+        <div class="card-icon">📊</div>
+        <h2>No Analytics or Tracking</h2>
+      </div>
+      <p>We collect <strong style="color:var(--text)">zero analytics</strong>, usage data, crash reports, or telemetry of any kind. No third-party SDKs. No ad networks. What you do inside VaultTix stays completely private — always.</p>
+    </div>
+
+    <div class="card c-pink">
+      <div class="card-header">
+        <div class="card-icon">🎭</div>
+        <h2>Dual PIN System</h2>
+      </div>
+      <p>The <strong style="color:var(--text)">Fake PIN</strong> opens a decoy vault to protect you under duress. Your real vault is only accessible via your real PIN or biometrics. Neither PIN is stored in plain text — both are hashed and salted.</p>
+    </div>
+
+    <div class="card c-blue">
+      <div class="card-header">
+        <div class="card-icon">📷</div>
+        <h2>Screenshot Protection</h2>
+      </div>
+      <p>VaultTix uses Android's <strong style="color:var(--text)">FLAG_SECURE</strong> to prevent screenshots, screen recordings, and app previews in the recent apps switcher. Your content is never visually exposed.</p>
+    </div>
+
+    <div class="card c-purple">
+      <div class="card-header">
+        <div class="card-icon">🧒</div>
+        <h2>Children's Privacy</h2>
+      </div>
+      <p>VaultTix does not knowingly collect any information from children under 13. The app has no account system, no data collection, and no network connectivity, making it inherently safe for all age groups.</p>
+    </div>
+
+    <div class="card c-green">
+      <div class="card-header">
+        <div class="card-icon">📝</div>
+        <h2>Policy Changes</h2>
+      </div>
+      <p>Any updates to this Privacy Policy will be reflected in the <strong style="color:var(--text)">app update notes</strong>. Since no data is collected, policy changes cannot affect stored user data.</p>
+    </div>
+
+  </div>
+
+  <!-- Contact -->
+  <div class="contact-card">
+    <div class="label">Questions or concerns?</div>
+    <div class="email">✉️ &nbsp;eatmanbrias@gmail.com</div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <strong>VaultTix v1.0.0</strong><br>
+    Developed by BRIA S EATMAN<br>
+    © 2024 VaultTix · All rights reserved<br>
+    <span style="font-size:11px;color:#2A3A5A;">Made with ❤️ for privacy-first users</span>
+  </div>
+
+</body>
+</html>
+
