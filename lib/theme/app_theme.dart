@@ -20,7 +20,7 @@ class AppColors {
   static const Color accentOrange = Color(0xFFFF6B35);
   static const Color accentPink = Color(0xFFFF4B8B);
 
-  // Gradients
+  // Gradient s
   static const List<Color> primaryGradient = [Color(0xFF6C63FF), Color(0xFF00D4FF)];
   static const List<Color> darkGradient = [Color(0xFF080B14), Color(0xFF0F1629)];
   static const List<Color> cardGradient = [Color(0xFF141B2D), Color(0xFF1A2237)];
