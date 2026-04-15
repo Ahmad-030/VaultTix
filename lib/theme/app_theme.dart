@@ -26,7 +26,7 @@ class AppColors {
   static const List<Color> cardGradient = [Color(0xFF141B2D), Color(0xFF1A2237)];
   static const List<Color> glowGradient = [Color(0x406C63FF), Color(0x0000D4FF)];
 
-  // Text
+  // Text (dark)
   static const Color textPrimary = Color(0xFFF0F4FF);
   static const Color textSecondary = Color(0xFF8A9BC4);
   static const Color textMuted = Color(0xFF4A5A7A);
@@ -40,9 +40,11 @@ class AppColors {
   static const Color lightBg = Color(0xFFF5F7FF);
   static const Color lightSurface = Color(0xFFFFFFFF);
   static const Color lightCard = Color(0xFFFFFFFF);
+  static const Color lightCardElevated = Color(0xFFEEF1FF);
   static const Color lightBorder = Color(0xFFE8EEFF);
   static const Color lightTextPrimary = Color(0xFF1A1F36);
   static const Color lightTextSecondary = Color(0xFF6B7A99);
+  static const Color lightTextMuted = Color(0xFFAAB4CC);
 }
 
 class AppTheme {
@@ -56,6 +58,7 @@ class AppTheme {
       surface: AppColors.darkSurface,
       error: AppColors.error,
     ),
+    extensions: const [AppColorsExtension.dark],
     textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme).copyWith(
       displayLarge: GoogleFonts.inter(
         color: AppColors.textPrimary,
@@ -137,9 +140,13 @@ class AppTheme {
     ),
     switchTheme: SwitchThemeData(
       thumbColor: WidgetStateProperty.resolveWith((states) =>
-          states.contains(WidgetState.selected) ? AppColors.primary : AppColors.textMuted),
+      states.contains(WidgetState.selected)
+          ? AppColors.primary
+          : AppColors.textMuted),
       trackColor: WidgetStateProperty.resolveWith((states) =>
-          states.contains(WidgetState.selected) ? AppColors.primary.withOpacity(0.3) : AppColors.darkBorder),
+      states.contains(WidgetState.selected)
+          ? AppColors.primary.withOpacity(0.3)
+          : AppColors.darkBorder),
     ),
     dividerTheme: const DividerThemeData(
       color: AppColors.darkBorder,
@@ -164,14 +171,36 @@ class AppTheme {
       surface: AppColors.lightSurface,
       error: AppColors.error,
     ),
+    extensions: const [AppColorsExtension.light],
     textTheme: GoogleFonts.interTextTheme(ThemeData.light().textTheme).copyWith(
       displayLarge: GoogleFonts.inter(
         color: AppColors.lightTextPrimary,
         fontSize: 32,
         fontWeight: FontWeight.w700,
       ),
-      bodyLarge: GoogleFonts.inter(color: AppColors.lightTextPrimary, fontSize: 16),
-      bodyMedium: GoogleFonts.inter(color: AppColors.lightTextSecondary, fontSize: 14),
+      displayMedium: GoogleFonts.inter(
+        color: AppColors.lightTextPrimary,
+        fontSize: 26,
+        fontWeight: FontWeight.w700,
+      ),
+      headlineMedium: GoogleFonts.inter(
+        color: AppColors.lightTextPrimary,
+        fontSize: 20,
+        fontWeight: FontWeight.w600,
+      ),
+      bodyLarge: GoogleFonts.inter(
+        color: AppColors.lightTextPrimary,
+        fontSize: 16,
+      ),
+      bodyMedium: GoogleFonts.inter(
+        color: AppColors.lightTextSecondary,
+        fontSize: 14,
+      ),
+      labelLarge: GoogleFonts.inter(
+        color: AppColors.lightTextPrimary,
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+      ),
     ),
     appBarTheme: AppBarTheme(
       backgroundColor: Colors.transparent,
@@ -209,6 +238,120 @@ class AppTheme {
         borderRadius: BorderRadius.circular(16),
         borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
       ),
+      labelStyle: GoogleFonts.inter(color: AppColors.lightTextSecondary),
+      hintStyle: GoogleFonts.inter(color: AppColors.lightTextMuted),
+    ),
+    switchTheme: SwitchThemeData(
+      thumbColor: WidgetStateProperty.resolveWith((states) =>
+      states.contains(WidgetState.selected)
+          ? AppColors.primary
+          : AppColors.lightTextMuted),
+      trackColor: WidgetStateProperty.resolveWith((states) =>
+      states.contains(WidgetState.selected)
+          ? AppColors.primary.withOpacity(0.3)
+          : AppColors.lightBorder),
+    ),
+    dividerTheme: const DividerThemeData(
+      color: AppColors.lightBorder,
+      thickness: 1,
+    ),
+    iconTheme: const IconThemeData(color: AppColors.lightTextSecondary),
+    snackBarTheme: SnackBarThemeData(
+      backgroundColor: AppColors.lightCard,
+      contentTextStyle: GoogleFonts.inter(color: AppColors.lightTextPrimary),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      behavior: SnackBarBehavior.floating,
     ),
   );
+}
+
+// ThemeExtension so any widget can call Theme.of(context).ext to get
+// theme-correct surface/card/border/text colours without duplicating logic.
+class AppColorsExtension extends ThemeExtension<AppColorsExtension> {
+  final Color bg;
+  final Color surface;
+  final Color card;
+  final Color cardElevated;
+  final Color border;
+  final Color textPrimary;
+  final Color textSecondary;
+  final Color textMuted;
+
+  const AppColorsExtension({
+    required this.bg,
+    required this.surface,
+    required this.card,
+    required this.cardElevated,
+    required this.border,
+    required this.textPrimary,
+    required this.textSecondary,
+    required this.textMuted,
+  });
+
+  static const dark = AppColorsExtension(
+    bg: AppColors.darkBg,
+    surface: AppColors.darkSurface,
+    card: AppColors.darkCard,
+    cardElevated: AppColors.darkCardElevated,
+    border: AppColors.darkBorder,
+    textPrimary: AppColors.textPrimary,
+    textSecondary: AppColors.textSecondary,
+    textMuted: AppColors.textMuted,
+  );
+
+  static const light = AppColorsExtension(
+    bg: AppColors.lightBg,
+    surface: AppColors.lightSurface,
+    card: AppColors.lightCard,
+    cardElevated: AppColors.lightCardElevated,
+    border: AppColors.lightBorder,
+    textPrimary: AppColors.lightTextPrimary,
+    textSecondary: AppColors.lightTextSecondary,
+    textMuted: AppColors.lightTextMuted,
+  );
+
+  @override
+  AppColorsExtension copyWith({
+    Color? bg,
+    Color? surface,
+    Color? card,
+    Color? cardElevated,
+    Color? border,
+    Color? textPrimary,
+    Color? textSecondary,
+    Color? textMuted,
+  }) {
+    return AppColorsExtension(
+      bg: bg ?? this.bg,
+      surface: surface ?? this.surface,
+      card: card ?? this.card,
+      cardElevated: cardElevated ?? this.cardElevated,
+      border: border ?? this.border,
+      textPrimary: textPrimary ?? this.textPrimary,
+      textSecondary: textSecondary ?? this.textSecondary,
+      textMuted: textMuted ?? this.textMuted,
+    );
+  }
+
+  @override
+  AppColorsExtension lerp(AppColorsExtension? other, double t) {
+    if (other == null) return this;
+    return AppColorsExtension(
+      bg: Color.lerp(bg, other.bg, t)!,
+      surface: Color.lerp(surface, other.surface, t)!,
+      card: Color.lerp(card, other.card, t)!,
+      cardElevated: Color.lerp(cardElevated, other.cardElevated, t)!,
+      border: Color.lerp(border, other.border, t)!,
+      textPrimary: Color.lerp(textPrimary, other.textPrimary, t)!,
+      textSecondary: Color.lerp(textSecondary, other.textSecondary, t)!,
+      textMuted: Color.lerp(textMuted, other.textMuted, t)!,
+    );
+  }
+}
+
+// Convenience extension on BuildContext
+extension AppThemeContext on BuildContext {
+  AppColorsExtension get appColors =>
+      Theme.of(this).extension<AppColorsExtension>()!;
+  bool get isDark => Theme.of(this).brightness == Brightness.dark;
 }

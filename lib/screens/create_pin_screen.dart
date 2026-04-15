@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import '../services/encryption_service.dart';
-import '../services/auth_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/common_widgets.dart';
 
@@ -23,14 +22,11 @@ class _CreatePinScreenState extends State<CreatePinScreen>
   String _firstPin = '';
   CreatePinStep _step = CreatePinStep.setPin;
   bool _isError = false;
-  bool _enableBiometric = false;
-  bool _biometricAvailable = false;
-  bool _skipFakePin = false;
   late AnimationController _shakeController;
   late Animation<double> _shakeAnim;
 
-  static const int _maxLength = 6;
-  static const int _minLength = 4;
+  // FIX: 4-digit PIN only — no min/max range
+  static const int _maxLength = 4;
 
   @override
   void initState() {
@@ -42,18 +38,12 @@ class _CreatePinScreenState extends State<CreatePinScreen>
     _shakeAnim = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(parent: _shakeController, curve: Curves.elasticIn),
     );
-    _checkBiometric();
   }
 
   @override
   void dispose() {
     _shakeController.dispose();
     super.dispose();
-  }
-
-  Future<void> _checkBiometric() async {
-    final available = await AuthService.isBiometricAvailable();
-    setState(() => _biometricAvailable = available);
   }
 
   void _onDigit(String digit) {
@@ -75,7 +65,7 @@ class _CreatePinScreenState extends State<CreatePinScreen>
   }
 
   Future<void> _processPin() async {
-    if (_pin.length < _minLength) return;
+    if (_pin.length < _maxLength) return;
 
     switch (_step) {
       case CreatePinStep.setPin:
@@ -110,9 +100,6 @@ class _CreatePinScreenState extends State<CreatePinScreen>
       case CreatePinStep.confirmFakePin:
         if (_pin == _firstPin) {
           await EncryptionService.saveFakePin(_pin);
-          if (_enableBiometric) {
-            await EncryptionService.setBiometricEnabled(true);
-          }
           if (mounted) context.go('/lock');
         } else {
           _showError();
@@ -154,7 +141,7 @@ class _CreatePinScreenState extends State<CreatePinScreen>
   String get _subtitle {
     switch (_step) {
       case CreatePinStep.setPin:
-        return 'Choose a 4–6 digit PIN to secure your vault';
+        return 'Choose a 4-digit PIN to secure your vault';
       case CreatePinStep.confirmPin:
         return 'Enter your PIN again to confirm';
       case CreatePinStep.setFakePin:
@@ -181,19 +168,14 @@ class _CreatePinScreenState extends State<CreatePinScreen>
                   children: [
                     const SizedBox(height: 60),
 
-                    // Step indicator
-                    _buildStepIndicator()
-                        .animate()
-                        .fadeIn(duration: 500.ms),
+                    _buildStepIndicator().animate().fadeIn(duration: 500.ms),
 
                     const SizedBox(height: 40),
 
-                    // Icon
                     _buildIcon(),
 
                     const SizedBox(height: 32),
 
-                    // Title
                     AnimatedSwitcher(
                       duration: const Duration(milliseconds: 300),
                       child: Column(
@@ -223,41 +205,39 @@ class _CreatePinScreenState extends State<CreatePinScreen>
 
                     const SizedBox(height: 40),
 
-                    // PIN dots
+                    // PIN dots with shake
                     AnimatedBuilder(
                       animation: _shakeAnim,
                       builder: (context, child) {
                         return Transform.translate(
                           offset: Offset(
-                            _isError ? 12 * (0.5 - _shakeAnim.value).abs() * 8 : 0,
+                            _isError
+                                ? 12 * (0.5 - _shakeAnim.value).abs() * 8
+                                : 0,
                             0,
                           ),
                           child: child,
                         );
                       },
-                      child: SizedBox(
-                        width: double.infinity,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.max,
-                          children: List.generate(_maxLength, (i) {
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 8),
-                              child: PinDot(
-                                filled: i < _pin.length,
-                                isError: _isError,
-                              ),
-                            );
-                          }),
-                        ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: List.generate(_maxLength, (i) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: PinDot(
+                              filled: i < _pin.length,
+                              isError: _isError,
+                            ),
+                          );
+                        }),
                       ),
                     ),
 
                     if (_isError) ...[
                       const SizedBox(height: 16),
-                      Text(
+                      const Text(
                         'PINs don\'t match. Try again.',
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: AppColors.error,
                           fontSize: 13,
                         ),
@@ -266,57 +246,16 @@ class _CreatePinScreenState extends State<CreatePinScreen>
 
                     const SizedBox(height: 40),
 
-                    // Number pad
                     NumberPad(
                       onDigitPressed: _onDigit,
                       onDelete: _onDelete,
                     ).animate().fadeIn(delay: 300.ms, duration: 500.ms),
-
-                    // Biometric option
-                    if (_step == CreatePinStep.setFakePin && _biometricAvailable) ...[
-                      const SizedBox(height: 24),
-                      GlassCard(
-                        onTap: () => setState(() => _enableBiometric = !_enableBiometric),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 40,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                color: AppColors.primary.withOpacity(0.15),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: const Icon(Icons.fingerprint, color: AppColors.primary),
-                            ),
-                            const SizedBox(width: 12),
-                            const Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text('Enable Biometrics',
-                                      style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
-                                  Text('Use fingerprint / Face ID',
-                                      style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
-                                ],
-                              ),
-                            ),
-                            Switch(
-                              value: _enableBiometric,
-                              onChanged: (v) => setState(() => _enableBiometric = v),
-                            ),
-                          ],
-                        ),
-                      ).animate().fadeIn(delay: 400.ms),
-                    ],
 
                     // Skip fake PIN
                     if (_step == CreatePinStep.setFakePin) ...[
                       const SizedBox(height: 16),
                       TextButton(
                         onPressed: () async {
-                          if (_enableBiometric) {
-                            await EncryptionService.setBiometricEnabled(true);
-                          }
                           if (mounted) context.go('/lock');
                         },
                         child: const Text(
@@ -390,7 +329,8 @@ class _CreatePinScreenState extends State<CreatePinScreen>
         ],
       ),
       child: Icon(
-        _step == CreatePinStep.setFakePin || _step == CreatePinStep.confirmFakePin
+        _step == CreatePinStep.setFakePin ||
+            _step == CreatePinStep.confirmFakePin
             ? Icons.masks_outlined
             : Icons.lock_rounded,
         color: Colors.white,

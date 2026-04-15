@@ -24,6 +24,9 @@ class _ChangePinScreenState extends State<ChangePinScreen>
   bool _isError = false;
   late AnimationController _shakeController;
 
+  // FIX: 4-digit PIN only
+  static const int _maxLength = 4;
+
   @override
   void initState() {
     super.initState();
@@ -40,13 +43,13 @@ class _ChangePinScreenState extends State<ChangePinScreen>
   }
 
   void _onDigit(String digit) {
-    if (_pin.length >= 6) return;
+    if (_pin.length >= _maxLength) return;
     HapticFeedback.lightImpact();
     setState(() {
       _pin += digit;
       _isError = false;
     });
-    if (_pin.length >= 4) {
+    if (_pin.length == _maxLength) {
       Future.delayed(const Duration(milliseconds: 100), _process);
     }
   }
@@ -74,8 +77,9 @@ class _ChangePinScreenState extends State<ChangePinScreen>
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(
-                  widget.isFakePin ? 'Fake PIN updated!' : 'PIN updated successfully!'),
+              content: Text(widget.isFakePin
+                  ? 'Fake PIN updated!'
+                  : 'PIN updated successfully!'),
               backgroundColor: AppColors.accentGreen,
             ),
           );
@@ -115,7 +119,8 @@ class _ChangePinScreenState extends State<ChangePinScreen>
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: AppColors.darkBorder),
                       ),
-                      child: const Icon(Icons.arrow_back, size: 18, color: AppColors.textPrimary),
+                      child: const Icon(Icons.arrow_back,
+                          size: 18, color: AppColors.textPrimary),
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -156,15 +161,17 @@ class _ChangePinScreenState extends State<ChangePinScreen>
                           ],
                         ),
                         child: Icon(
-                          widget.isFakePin ? Icons.masks_outlined : Icons.pin_outlined,
+                          widget.isFakePin
+                              ? Icons.masks_outlined
+                              : Icons.pin_outlined,
                           color: Colors.white,
                           size: 34,
                         ),
                       ).animate().scale(
-                            begin: const Offset(0.8, 0.8),
-                            duration: 400.ms,
-                            curve: Curves.easeOutBack,
-                          ),
+                        begin: const Offset(0.8, 0.8),
+                        duration: 400.ms,
+                        curve: Curves.easeOutBack,
+                      ),
 
                       const SizedBox(height: 24),
 
@@ -174,8 +181,8 @@ class _ChangePinScreenState extends State<ChangePinScreen>
                           _isConfirming
                               ? 'Confirm new PIN'
                               : widget.isFakePin
-                                  ? 'Enter new Fake PIN'
-                                  : 'Enter new PIN',
+                              ? 'Enter new Fake PIN'
+                              : 'Enter new PIN',
                           key: ValueKey(_isConfirming),
                           style: const TextStyle(
                             color: AppColors.textPrimary,
@@ -189,21 +196,24 @@ class _ChangePinScreenState extends State<ChangePinScreen>
                       Text(
                         _isError
                             ? 'PINs don\'t match. Try again.'
-                            : 'Choose a 4–6 digit PIN',
+                            : 'Enter a 4-digit PIN',
                         style: TextStyle(
-                          color: _isError ? AppColors.error : AppColors.textSecondary,
+                          color:
+                          _isError ? AppColors.error : AppColors.textSecondary,
                           fontSize: 14,
                         ),
                       ).animate(target: _isError ? 1 : 0).shake(),
 
                       const SizedBox(height: 40),
 
+                      // FIX: 4 dots instead of 6
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: List.generate(6, (i) {
+                        children: List.generate(_maxLength, (i) {
                           return Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 8),
-                            child: PinDot(filled: i < _pin.length, isError: _isError),
+                            child: PinDot(
+                                filled: i < _pin.length, isError: _isError),
                           );
                         }),
                       ),

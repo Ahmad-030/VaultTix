@@ -5,7 +5,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../services/encryption_service.dart';
-import '../services/auth_service.dart';
 import '../services/database_service.dart';
 import '../services/providers.dart';
 import '../theme/app_theme.dart';
@@ -19,8 +18,6 @@ class SettingsScreen extends ConsumerStatefulWidget {
 }
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
-  bool _biometricEnabled = false;
-  bool _biometricAvailable = false;
   int _autoLockDuration = 30;
   bool _hasFakePin = false;
 
@@ -31,13 +28,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Future<void> _load() async {
-    final bio = await EncryptionService.isBiometricEnabled();
-    final bioAvail = await AuthService.isBiometricAvailable();
     final fake = await EncryptionService.hasFakePin();
     final lock = await EncryptionService.getAutoLockDuration();
     setState(() {
-      _biometricEnabled = bio;
-      _biometricAvailable = bioAvail;
       _hasFakePin = fake;
       _autoLockDuration = lock;
     });
@@ -45,75 +38,68 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.appColors;
     final isDark = ref.watch(themeProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.darkBg,
+      backgroundColor: c.bg,
       body: SafeArea(
         child: Column(
           children: [
-            _buildHeader(),
+            _buildHeader(c),
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
                   children: [
                     const SizedBox(height: 8),
+
                     _buildSection(
+                      context,
+                      c,
                       'Security',
                       Icons.security,
                       AppColors.primary,
                       [
+                        _buildNavItem(c, 'Change PIN', 'Update your real vault PIN',
+                            Icons.pin_outlined, () => context.push('/change-pin')),
                         _buildNavItem(
-                          'Change PIN',
-                          'Update your real vault PIN',
-                          Icons.pin_outlined,
-                          () => context.push('/change-pin'),
-                        ),
-                        _buildNavItem(
+                          c,
                           _hasFakePin ? 'Change Fake PIN' : 'Set Fake PIN',
                           'Decoy vault protection',
                           Icons.masks_outlined,
-                          () => context.push('/change-fake-pin'),
+                              () => context.push('/change-fake-pin'),
                         ),
-                        if (_biometricAvailable)
-                          _buildToggleItem(
-                            'Biometric Unlock',
-                            'Fingerprint / Face ID',
-                            Icons.fingerprint,
-                            _biometricEnabled,
-                            (v) async {
-                              await EncryptionService.setBiometricEnabled(v);
-                              setState(() => _biometricEnabled = v);
-                            },
-                          ),
                       ],
                     ).animate().fadeIn(delay: 100.ms).slideY(begin: 0.2, end: 0),
 
                     const SizedBox(height: 16),
 
                     _buildSection(
+                      context,
+                      c,
                       'Auto-Lock',
                       Icons.timer_outlined,
                       AppColors.accent,
-                      [
-                        _buildAutoLockOptions(),
-                      ],
+                      [_buildAutoLockOptions(c)],
                     ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.2, end: 0),
 
                     const SizedBox(height: 16),
 
                     _buildSection(
+                      context,
+                      c,
                       'Appearance',
                       Icons.palette_outlined,
                       AppColors.accentGreen,
                       [
                         _buildToggleItem(
+                          c,
                           'Dark Mode',
                           'Toggle light/dark theme',
                           Icons.dark_mode_outlined,
                           isDark,
-                          (_) => ref.read(themeProvider.notifier).toggle(),
+                              (_) => ref.read(themeProvider.notifier).toggle(),
                         ),
                       ],
                     ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.2, end: 0),
@@ -121,28 +107,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     const SizedBox(height: 16),
 
                     _buildSection(
+                      context,
+                      c,
                       'Data',
                       Icons.storage_outlined,
                       AppColors.accentOrange,
                       [
-                        _buildNavItem(
-                          'About',
-                          'Developer info & version',
-                          Icons.info_outline,
-                          () => context.push('/about'),
-                        ),
-                        _buildNavItem(
-                          'Privacy Policy',
-                          'How we handle your data',
-                          Icons.privacy_tip_outlined,
-                          () => context.push('/privacy'),
-                        ),
-                        _buildDangerItem(
-                          'Clear All Data',
-                          'Delete all notes & settings',
-                          Icons.delete_forever_outlined,
-                          _confirmClearAll,
-                        ),
+                        _buildNavItem(c, 'About', 'Developer info & version',
+                            Icons.info_outline, () => context.push('/about')),
+                        _buildNavItem(c, 'Privacy Policy', 'How we handle your data',
+                            Icons.privacy_tip_outlined,
+                                () => context.push('/privacy')),
+                        _buildDangerItem(c, 'Clear All Data',
+                            'Delete all notes & settings',
+                            Icons.delete_forever_outlined, _confirmClearAll),
                       ],
                     ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.2, end: 0),
 
@@ -157,7 +135,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(AppColorsExtension c) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
       child: Row(
@@ -168,18 +146,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: AppColors.darkCard,
+                color: c.card,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.darkBorder),
+                border: Border.all(color: c.border),
               ),
-              child: const Icon(Icons.arrow_back, size: 18, color: AppColors.textPrimary),
+              child: Icon(Icons.arrow_back, size: 18, color: c.textPrimary),
             ),
           ),
           const SizedBox(width: 16),
-          const Text(
+          Text(
             'Settings',
             style: TextStyle(
-              color: AppColors.textPrimary,
+              color: c.textPrimary,
               fontSize: 22,
               fontWeight: FontWeight.w700,
             ),
@@ -189,12 +167,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Widget _buildSection(String title, IconData icon, Color color, List<Widget> children) {
+  Widget _buildSection(
+      BuildContext context,
+      AppColorsExtension c,
+      String title,
+      IconData icon,
+      Color color,
+      List<Widget> children,
+      ) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.darkCard,
+        color: c.card,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.darkBorder),
+        border: Border.all(color: c.border),
       ),
       child: Column(
         children: [
@@ -214,8 +199,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const SizedBox(width: 10),
                 Text(
                   title,
-                  style: const TextStyle(
-                    color: AppColors.textSecondary,
+                  style: TextStyle(
+                    color: c.textSecondary,
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 0.5,
@@ -232,42 +217,55 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Widget _buildNavItem(String title, String subtitle, IconData icon, VoidCallback onTap) {
+  Widget _buildNavItem(AppColorsExtension c, String title, String subtitle,
+      IconData icon, VoidCallback onTap) {
     return ListTile(
       onTap: () {
         HapticFeedback.lightImpact();
         onTap();
       },
-      leading: Icon(icon, color: AppColors.textSecondary, size: 20),
+      leading: Icon(icon, color: c.textSecondary, size: 20),
       title: Text(title,
-          style: const TextStyle(color: AppColors.textPrimary, fontSize: 15, fontWeight: FontWeight.w500)),
-      subtitle: Text(subtitle,
-          style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
-      trailing: const Icon(Icons.chevron_right, color: AppColors.textMuted, size: 18),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          style: TextStyle(
+              color: c.textPrimary,
+              fontSize: 15,
+              fontWeight: FontWeight.w500)),
+      subtitle:
+      Text(subtitle, style: TextStyle(color: c.textMuted, fontSize: 12)),
+      trailing:
+      Icon(Icons.chevron_right, color: c.textMuted, size: 18),
+      contentPadding:
+      const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+      shape:
+      RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     );
   }
 
   Widget _buildToggleItem(
-    String title,
-    String subtitle,
-    IconData icon,
-    bool value,
-    Function(bool) onChanged,
-  ) {
+      AppColorsExtension c,
+      String title,
+      String subtitle,
+      IconData icon,
+      bool value,
+      Function(bool) onChanged,
+      ) {
     return ListTile(
-      leading: Icon(icon, color: AppColors.textSecondary, size: 20),
+      leading: Icon(icon, color: c.textSecondary, size: 20),
       title: Text(title,
-          style: const TextStyle(color: AppColors.textPrimary, fontSize: 15, fontWeight: FontWeight.w500)),
-      subtitle: Text(subtitle,
-          style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
+          style: TextStyle(
+              color: c.textPrimary,
+              fontSize: 15,
+              fontWeight: FontWeight.w500)),
+      subtitle:
+      Text(subtitle, style: TextStyle(color: c.textMuted, fontSize: 12)),
       trailing: Switch(value: value, onChanged: onChanged),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+      contentPadding:
+      const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
     );
   }
 
-  Widget _buildDangerItem(String title, String subtitle, IconData icon, VoidCallback onTap) {
+  Widget _buildDangerItem(AppColorsExtension c, String title, String subtitle,
+      IconData icon, VoidCallback onTap) {
     return ListTile(
       onTap: () {
         HapticFeedback.heavyImpact();
@@ -275,16 +273,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       },
       leading: Icon(icon, color: AppColors.error, size: 20),
       title: Text(title,
-          style: const TextStyle(color: AppColors.error, fontSize: 15, fontWeight: FontWeight.w500)),
-      subtitle: Text(subtitle,
-          style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
+          style: const TextStyle(
+              color: AppColors.error,
+              fontSize: 15,
+              fontWeight: FontWeight.w500)),
+      subtitle:
+      Text(subtitle, style: TextStyle(color: c.textMuted, fontSize: 12)),
       trailing: const Icon(Icons.chevron_right, color: AppColors.error, size: 18),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      contentPadding:
+      const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+      shape:
+      RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     );
   }
 
-  Widget _buildAutoLockOptions() {
+  Widget _buildAutoLockOptions(AppColorsExtension c) {
     final options = [
       (0, 'Instant'),
       (30, '30 seconds'),
@@ -306,20 +309,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             },
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: isSelected ? AppColors.primary : AppColors.darkCardElevated,
+                color: isSelected ? AppColors.primary : c.cardElevated,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: isSelected ? AppColors.primary : AppColors.darkBorder,
+                  color: isSelected ? AppColors.primary : c.border,
                 ),
               ),
               child: Text(
                 opt.$2,
                 style: TextStyle(
-                  color: isSelected ? Colors.white : AppColors.textSecondary,
+                  color: isSelected ? Colors.white : c.textSecondary,
                   fontSize: 13,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                  fontWeight:
+                  isSelected ? FontWeight.w600 : FontWeight.w400,
                 ),
               ),
             ),
@@ -330,21 +335,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   void _confirmClearAll() {
+    final c = context.appColors;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.darkCard,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Clear All Data?',
-            style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
-        content: const Text(
+        backgroundColor: c.card,
+        shape:
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text('Clear All Data?',
+            style: TextStyle(
+                color: c.textPrimary, fontWeight: FontWeight.w700)),
+        content: Text(
           'This will permanently delete all notes, PIN, and settings. This cannot be undone.',
-          style: TextStyle(color: AppColors.textSecondary),
+          style: TextStyle(color: c.textSecondary),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
+            child: Text('Cancel',
+                style: TextStyle(color: c.textSecondary)),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -353,8 +362,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               await EncryptionService.clearAll();
               if (mounted) context.go('/create-pin');
             },
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
-            child: const Text('Clear All', style: TextStyle(color: Colors.white)),
+            style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.error),
+            child: const Text('Clear All',
+                style: TextStyle(color: Colors.white)),
           ),
         ],
       ),

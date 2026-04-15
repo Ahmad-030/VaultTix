@@ -5,7 +5,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:go_router/go_router.dart';
-import 'package:uuid/uuid.dart';
 import '../models/note_model.dart';
 import '../services/providers.dart';
 import '../theme/app_theme.dart';
@@ -58,23 +57,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
   @override
   Widget build(BuildContext context) {
+    final c = context.appColors;
     final notes = ref.watch(notesProvider);
     final isGrid = ref.watch(isGridViewProvider);
     final isFakeVault = ref.watch(vaultModeProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.darkBg,
+      backgroundColor: c.bg,
       body: Stack(
         children: [
           _buildBackground(),
           CustomScrollView(
             controller: _scrollController,
             slivers: [
-              _buildAppBar(isFakeVault, isGrid),
-              SliverToBoxAdapter(child: _buildSearchBar()),
-              SliverToBoxAdapter(child: _buildStatsBar(notes)),
+              _buildAppBar(c, isFakeVault, isGrid),
+              SliverToBoxAdapter(child: _buildSearchBar(c)),
+              SliverToBoxAdapter(child: _buildStatsBar(c, notes)),
               if (notes.isEmpty)
-                SliverFillRemaining(child: _buildEmptyState())
+                SliverFillRemaining(child: _buildEmptyState(c))
               else
                 _buildNotesList(notes, isGrid),
             ],
@@ -95,12 +95,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     );
   }
 
-  Widget _buildAppBar(bool isFakeVault, bool isGrid) {
+  Widget _buildAppBar(AppColorsExtension c, bool isFakeVault, bool isGrid) {
     return SliverAppBar(
       expandedHeight: 120,
       floating: true,
       pinned: true,
-      backgroundColor: AppColors.darkBg,
+      backgroundColor: c.bg,
       elevation: 0,
       flexibleSpace: FlexibleSpaceBar(
         background: Padding(
@@ -131,11 +131,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         if (isFakeVault) ...[
                           const SizedBox(width: 8),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 3),
                             decoration: BoxDecoration(
                               color: AppColors.accentOrange.withOpacity(0.15),
                               borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: AppColors.accentOrange.withOpacity(0.3)),
+                              border: Border.all(
+                                  color: AppColors.accentOrange.withOpacity(0.3)),
                             ),
                             child: const Text(
                               'DECOY',
@@ -150,9 +152,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         ],
                       ],
                     ),
-                    const Text(
+                    Text(
                       'Your private vault',
-                      style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                      style: TextStyle(color: c.textSecondary, fontSize: 13),
                     ),
                   ],
                 ).animate().fadeIn(delay: 100.ms).slideX(begin: -0.2, end: 0),
@@ -160,16 +162,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               Row(
                 children: [
                   _buildIconButton(
-                    icon: isGrid ? Icons.view_list_rounded : Icons.grid_view_rounded,
-                    onTap: () => ref.read(isGridViewProvider.notifier).state = !isGrid,
+                    c: c,
+                    icon: isGrid
+                        ? Icons.view_list_rounded
+                        : Icons.grid_view_rounded,
+                    onTap: () =>
+                    ref.read(isGridViewProvider.notifier).state = !isGrid,
                   ),
                   const SizedBox(width: 8),
                   _buildIconButton(
+                    c: c,
                     icon: Icons.settings_outlined,
                     onTap: () => context.push('/settings'),
                   ),
                   const SizedBox(width: 8),
                   _buildIconButton(
+                    c: c,
                     icon: Icons.lock_rounded,
                     onTap: _lock,
                     color: AppColors.primary,
@@ -184,6 +192,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   }
 
   Widget _buildIconButton({
+    required AppColorsExtension c,
     required IconData icon,
     required VoidCallback onTap,
     Color? color,
@@ -197,16 +206,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         width: 40,
         height: 40,
         decoration: BoxDecoration(
-          color: AppColors.darkCard,
+          color: c.card,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.darkBorder),
+          border: Border.all(color: c.border),
         ),
-        child: Icon(icon, size: 18, color: color ?? AppColors.textSecondary),
+        child: Icon(icon, size: 18, color: color ?? c.textSecondary),
       ),
     );
   }
 
-  Widget _buildSearchBar() {
+  Widget _buildSearchBar(AppColorsExtension c) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
       child: GestureDetector(
@@ -215,15 +224,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           height: 48,
           padding: const EdgeInsets.symmetric(horizontal: 16),
           decoration: BoxDecoration(
-            color: AppColors.darkCard,
+            color: c.card,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.darkBorder),
+            border: Border.all(color: c.border),
           ),
-          child: const Row(
+          child: Row(
             children: [
-              Icon(Icons.search, color: AppColors.textMuted, size: 20),
-              SizedBox(width: 10),
-              Text('Search notes...', style: TextStyle(color: AppColors.textMuted, fontSize: 14)),
+              Icon(Icons.search, color: c.textMuted, size: 20),
+              const SizedBox(width: 10),
+              Text('Search notes...',
+                  style: TextStyle(color: c.textMuted, fontSize: 14)),
             ],
           ),
         ),
@@ -231,7 +241,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     );
   }
 
-  Widget _buildStatsBar(List<NoteModel> notes) {
+  Widget _buildStatsBar(AppColorsExtension c, List<NoteModel> notes) {
     final pinned = notes.where((n) => n.isPinned).length;
     final secure = notes.where((n) => n.isSecure).length;
 
@@ -239,24 +249,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
       child: Row(
         children: [
-          _buildStat('${notes.length}', 'Notes', Icons.note_alt_outlined),
+          _buildStat(c, '${notes.length}', 'Notes', Icons.note_alt_outlined),
           const SizedBox(width: 12),
-          _buildStat('$pinned', 'Pinned', Icons.push_pin_outlined),
+          _buildStat(c, '$pinned', 'Pinned', Icons.push_pin_outlined),
           const SizedBox(width: 12),
-          _buildStat('$secure', 'Secure', Icons.shield_outlined),
+          _buildStat(c, '$secure', 'Secure', Icons.shield_outlined),
         ],
       ).animate().fadeIn(delay: 400.ms),
     );
   }
 
-  Widget _buildStat(String value, String label, IconData icon) {
+  Widget _buildStat(
+      AppColorsExtension c, String value, String label, IconData icon) {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
         decoration: BoxDecoration(
-          color: AppColors.darkCard,
+          color: c.card,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppColors.darkBorder),
+          border: Border.all(color: c.border),
         ),
         child: Row(
           children: [
@@ -266,13 +277,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(value,
-                    style: const TextStyle(
-                      color: AppColors.textPrimary,
+                    style: TextStyle(
+                      color: c.textPrimary,
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
                     )),
                 Text(label,
-                    style: const TextStyle(color: AppColors.textMuted, fontSize: 11)),
+                    style: TextStyle(color: c.textMuted, fontSize: 11)),
               ],
             ),
           ],
@@ -286,41 +297,41 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
       sliver: isGrid
           ? SliverGrid(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: 0.85,
-              ),
-              delegate: SliverChildBuilderDelegate(
-                (context, i) => AnimationConfiguration.staggeredGrid(
-                  position: i,
-                  duration: const Duration(milliseconds: 400),
-                  columnCount: 2,
-                  child: FadeInAnimation(
-                    child: ScaleAnimation(
-                      child: _buildNoteItem(notes[i], isGrid: true),
-                    ),
-                  ),
-                ),
-                childCount: notes.length,
-              ),
-            )
-          : SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, i) => AnimationConfiguration.staggeredList(
-                  position: i,
-                  duration: const Duration(milliseconds: 400),
-                  child: SlideAnimation(
-                    verticalOffset: 30,
-                    child: FadeInAnimation(
-                      child: _buildNoteItem(notes[i], isGrid: false),
-                    ),
-                  ),
-                ),
-                childCount: notes.length,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: 0.85,
+        ),
+        delegate: SliverChildBuilderDelegate(
+              (context, i) => AnimationConfiguration.staggeredGrid(
+            position: i,
+            duration: const Duration(milliseconds: 400),
+            columnCount: 2,
+            child: FadeInAnimation(
+              child: ScaleAnimation(
+                child: _buildNoteItem(notes[i], isGrid: true),
               ),
             ),
+          ),
+          childCount: notes.length,
+        ),
+      )
+          : SliverList(
+        delegate: SliverChildBuilderDelegate(
+              (context, i) => AnimationConfiguration.staggeredList(
+            position: i,
+            duration: const Duration(milliseconds: 400),
+            child: SlideAnimation(
+              verticalOffset: 30,
+              child: FadeInAnimation(
+                child: _buildNoteItem(notes[i], isGrid: false),
+              ),
+            ),
+          ),
+          childCount: notes.length,
+        ),
+      ),
     );
   }
 
@@ -335,9 +346,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   }
 
   void _confirmDelete(NoteModel note) {
+    final c = context.appColors;
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.darkCard,
+      backgroundColor: c.card,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -350,22 +362,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: AppColors.darkBorder,
+                color: c.border,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
             const SizedBox(height: 20),
             const Icon(Icons.delete_outline, color: AppColors.error, size: 40),
             const SizedBox(height: 12),
-            const Text('Delete Note?',
+            Text('Delete Note?',
                 style: TextStyle(
-                  color: AppColors.textPrimary,
+                  color: c.textPrimary,
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
                 )),
             const SizedBox(height: 8),
-            const Text('This action cannot be undone.',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 14)),
+            Text('This action cannot be undone.',
+                style:
+                TextStyle(color: c.textSecondary, fontSize: 14)),
             const SizedBox(height: 24),
             Row(
               children: [
@@ -373,12 +386,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                   child: OutlinedButton(
                     onPressed: () => Navigator.pop(ctx),
                     style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: AppColors.darkBorder),
+                      side: BorderSide(color: c.border),
                       padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
                     ),
-                    child: const Text('Cancel',
-                        style: TextStyle(color: AppColors.textSecondary)),
+                    child: Text('Cancel',
+                        style: TextStyle(color: c.textSecondary)),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -391,9 +405,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.error,
                       padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
                     ),
-                    child: const Text('Delete', style: TextStyle(color: Colors.white)),
+                    child: const Text('Delete',
+                        style: TextStyle(color: Colors.white)),
                   ),
                 ),
               ],
@@ -405,7 +421,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(AppColorsExtension c) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -417,23 +433,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               color: AppColors.primary.withOpacity(0.08),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.note_add_outlined, size: 44, color: AppColors.primary),
-          ).animate(onPlay: (c) => c.repeat(reverse: true)).scale(
+            child: const Icon(Icons.note_add_outlined,
+                size: 44, color: AppColors.primary),
+          )
+              .animate(onPlay: (c) => c.repeat(reverse: true))
+              .scale(
             begin: const Offset(0.95, 0.95),
             end: const Offset(1.05, 1.05),
             duration: 2.seconds,
             curve: Curves.easeInOut,
           ),
           const SizedBox(height: 24),
-          const Text('Your vault is empty',
+          Text('Your vault is empty',
               style: TextStyle(
-                color: AppColors.textPrimary,
+                color: c.textPrimary,
                 fontSize: 20,
                 fontWeight: FontWeight.w600,
               )),
           const SizedBox(height: 8),
-          const Text('Tap + to add your first secure note',
-              style: TextStyle(color: AppColors.textSecondary, fontSize: 14)),
+          Text('Tap + to add your first secure note',
+              style: TextStyle(color: c.textSecondary, fontSize: 14)),
         ],
       ).animate().fadeIn(delay: 300.ms).scale(begin: const Offset(0.9, 0.9)),
     );

@@ -1,4 +1,4 @@
-// lib/widgets/glass_card.dart
+// lib/widgets/common_widgets.dart
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../models/note_model.dart';
@@ -53,7 +53,6 @@ class GlassCard extends StatelessWidget {
   }
 }
 
-// lib/widgets/gradient_button.dart
 class GradientButton extends StatefulWidget {
   final String text;
   final VoidCallback onTap;
@@ -169,7 +168,9 @@ class _GradientButtonState extends State<GradientButton>
   }
 }
 
-// Pin Dot Indicator
+// FIX: Use plain Container instead of AnimatedContainer.
+// AnimatedContainer tweens BoxShadow blurRadius from 8->0 which triggers
+// a Flutter assert (blurRadius must be >= 0) due to floating-point precision.
 class PinDot extends StatelessWidget {
   final bool filled;
   final bool isError;
@@ -178,65 +179,64 @@ class PinDot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      curve: Curves.easeOutBack,
+    final Color dotColor = isError
+        ? AppColors.error
+        : filled
+        ? AppColors.primary
+        : Colors.transparent;
+
+    final Color borderColor = isError
+        ? AppColors.error
+        : filled
+        ? AppColors.primary
+        : AppColors.textMuted;
+
+    // Only apply shadow when filled and not in error state — no tweening
+    final List<BoxShadow> shadows = (filled && !isError)
+        ? [
+      BoxShadow(
+        color: AppColors.primary.withOpacity(0.5),
+        blurRadius: 8,
+        spreadRadius: 0,
+      ),
+    ]
+        : [];
+
+    return Container(
       width: 16,
       height: 16,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: isError
-            ? AppColors.error
-            : filled
-            ? AppColors.primary
-            : Colors.transparent,
-        border: Border.all(
-          color: isError
-              ? AppColors.error
-              : filled
-              ? AppColors.primary
-              : AppColors.textMuted,
-          width: 2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: isError
-                ? AppColors.error.withOpacity(filled ? 0.5 : 0.0)
-                : AppColors.primary.withOpacity(filled ? 0.5 : 0.0),
-            blurRadius: filled ? 8 : 0,
-          ),
-        ],
+        color: dotColor,
+        border: Border.all(color: borderColor, width: 2),
+        boxShadow: shadows,
       ),
     );
   }
 }
 
-// Number Pad
+// NumberPad — biometric removed entirely
 class NumberPad extends StatelessWidget {
   final Function(String) onDigitPressed;
   final VoidCallback onDelete;
-  final VoidCallback? onBiometric;
-  final bool showBiometric;
 
   const NumberPad({
     super.key,
     required this.onDigitPressed,
     required this.onDelete,
-    this.onBiometric,
-    this.showBiometric = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    final digits = [
+    final rows = [
       ['1', '2', '3'],
       ['4', '5', '6'],
       ['7', '8', '9'],
-      ['bio', '0', 'del'],
+      ['', '0', 'del'],
     ];
 
     return Column(
-      children: digits.map((row) {
+      children: rows.map((row) {
         return Padding(
           padding: const EdgeInsets.only(bottom: 12),
           child: Row(
@@ -244,7 +244,7 @@ class NumberPad extends StatelessWidget {
             children: row.map((key) {
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: _buildKey(context, key),
+                child: _buildKey(key),
               );
             }).toList(),
           ),
@@ -253,29 +253,9 @@ class NumberPad extends StatelessWidget {
     );
   }
 
-  Widget _buildKey(BuildContext context, String key) {
-    if (key == 'bio') {
-      return SizedBox(
-        width: 72,
-        height: 72,
-        child: showBiometric
-            ? GestureDetector(
-          onTap: onBiometric,
-          child: Container(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.darkCardElevated,
-              border: Border.all(color: AppColors.darkBorder),
-            ),
-            child: const Icon(
-              Icons.fingerprint,
-              color: AppColors.primary,
-              size: 32,
-            ),
-          ),
-        )
-            : const SizedBox.shrink(),
-      );
+  Widget _buildKey(String key) {
+    if (key == '') {
+      return const SizedBox(width: 72, height: 72);
     }
 
     if (key == 'del') {
@@ -346,9 +326,8 @@ class NoteCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-
-    final colors = NoteColors.colorMap[note.color ?? 'default'] ?? NoteColors.colorMap['default']!;
+    final colors =
+        NoteColors.colorMap[note.color ?? 'default'] ?? NoteColors.colorMap['default']!;
 
     return GestureDetector(
       onTap: onTap,
@@ -446,10 +425,7 @@ class NoteCard extends StatelessWidget {
                 children: [
                   Text(
                     _formatDate(note.updatedAt),
-                    style: const TextStyle(
-                      color: AppColors.textMuted,
-                      fontSize: 11,
-                    ),
+                    style: const TextStyle(color: AppColors.textMuted, fontSize: 11),
                   ),
                   const Spacer(),
                   GestureDetector(

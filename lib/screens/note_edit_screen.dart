@@ -68,14 +68,16 @@ class _NoteEditScreenState extends ConsumerState<NoteEditScreen>
   Future<void> _loadNote() async {
     if (!isNew) {
       final notes = ref.read(notesProvider);
-      final note = notes.firstWhere((n) => n.id == widget.noteId,
-          orElse: () => NoteModel(
-                id: '',
-                title: '',
-                content: '',
-                createdAt: DateTime.now(),
-                updatedAt: DateTime.now(),
-              ));
+      final note = notes.firstWhere(
+            (n) => n.id == widget.noteId,
+        orElse: () => NoteModel(
+          id: '',
+          title: '',
+          content: '',
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ),
+      );
       if (note.id.isNotEmpty) {
         setState(() {
           _existingNote = note;
@@ -150,14 +152,16 @@ class _NoteEditScreenState extends ConsumerState<NoteEditScreen>
 
   @override
   Widget build(BuildContext context) {
-    final colors = NoteColors.colorMap[_selectedColor] ?? NoteColors.colorMap['default']!;
+    final c = context.appColors;
+    final colors =
+        NoteColors.colorMap[_selectedColor] ?? NoteColors.colorMap['default']!;
 
     return Scaffold(
       backgroundColor: Color(colors[0]),
       body: SafeArea(
         child: Column(
           children: [
-            _buildTopBar(),
+            _buildTopBar(c),
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -169,15 +173,15 @@ class _NoteEditScreenState extends ConsumerState<NoteEditScreen>
                     // Title field
                     TextField(
                       controller: _titleController,
-                      style: const TextStyle(
-                        color: AppColors.textPrimary,
+                      style: TextStyle(
+                        color: c.textPrimary,
                         fontSize: 24,
                         fontWeight: FontWeight.w700,
                       ),
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         hintText: 'Title',
                         hintStyle: TextStyle(
-                          color: AppColors.textMuted,
+                          color: c.textMuted,
                           fontSize: 24,
                           fontWeight: FontWeight.w700,
                         ),
@@ -194,29 +198,28 @@ class _NoteEditScreenState extends ConsumerState<NoteEditScreen>
 
                     const SizedBox(height: 4),
 
-                    // Date
                     Text(
                       _formatDate(DateTime.now()),
-                      style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
+                      style: TextStyle(color: c.textMuted, fontSize: 12),
                     ).animate().fadeIn(delay: 200.ms),
 
                     const SizedBox(height: 16),
 
-                    // Divider
-                    Container(height: 1, color: AppColors.darkBorder.withOpacity(0.5)),
+                    Container(height: 1, color: c.border.withOpacity(0.5)),
                     const SizedBox(height: 16),
 
                     // Content field
                     TextField(
                       controller: _contentController,
-                      style: const TextStyle(
-                        color: AppColors.textPrimary,
+                      style: TextStyle(
+                        color: c.textPrimary,
                         fontSize: 16,
                         height: 1.7,
                       ),
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         hintText: 'Write your note here...',
-                        hintStyle: TextStyle(color: AppColors.textMuted, fontSize: 16),
+                        hintStyle:
+                        TextStyle(color: c.textMuted, fontSize: 16),
                         border: InputBorder.none,
                         enabledBorder: InputBorder.none,
                         focusedBorder: InputBorder.none,
@@ -232,8 +235,7 @@ class _NoteEditScreenState extends ConsumerState<NoteEditScreen>
 
                     const SizedBox(height: 20),
 
-                    // Tags
-                    _buildTagsSection().animate().fadeIn(delay: 400.ms),
+                    _buildTagsSection(c).animate().fadeIn(delay: 400.ms),
 
                     const SizedBox(height: 80),
                   ],
@@ -246,12 +248,12 @@ class _NoteEditScreenState extends ConsumerState<NoteEditScreen>
     );
   }
 
-  Widget _buildTopBar() {
+  Widget _buildTopBar(AppColorsExtension c) {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
       decoration: BoxDecoration(
         color: Colors.transparent,
-        border: Border(bottom: BorderSide(color: AppColors.darkBorder.withOpacity(0.3))),
+        border: Border(bottom: BorderSide(color: c.border.withOpacity(0.3))),
       ),
       child: Row(
         children: [
@@ -261,14 +263,14 @@ class _NoteEditScreenState extends ConsumerState<NoteEditScreen>
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: AppColors.darkCardElevated,
+                color: c.cardElevated,
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: const Icon(Icons.arrow_back_ios_new, size: 16, color: AppColors.textPrimary),
+              child: Icon(Icons.arrow_back_ios_new,
+                  size: 16, color: c.textPrimary),
             ),
           ),
 
-          // Auto-save indicator
           const SizedBox(width: 12),
           AnimatedBuilder(
             animation: _saveIndicatorController,
@@ -286,14 +288,16 @@ class _NoteEditScreenState extends ConsumerState<NoteEditScreen>
                       ),
                     ),
                     const SizedBox(width: 6),
-                    const Text('Saving...',
-                        style: TextStyle(color: AppColors.textMuted, fontSize: 12)),
+                    Text('Saving...',
+                        style: TextStyle(
+                            color: c.textMuted, fontSize: 12)),
                   ] else if (!_hasChanges && _existingNote != null) ...[
                     const Icon(Icons.check_circle_outline,
                         size: 14, color: AppColors.accentGreen),
                     const SizedBox(width: 6),
                     const Text('Saved',
-                        style: TextStyle(color: AppColors.accentGreen, fontSize: 12)),
+                        style: TextStyle(
+                            color: AppColors.accentGreen, fontSize: 12)),
                   ],
                 ],
               ),
@@ -302,12 +306,11 @@ class _NoteEditScreenState extends ConsumerState<NoteEditScreen>
 
           const Spacer(),
 
-          // Options
           GestureDetector(
             onTap: () => setState(() => _isPinned = !_isPinned),
             child: Icon(
               _isPinned ? Icons.push_pin : Icons.push_pin_outlined,
-              color: _isPinned ? AppColors.primary : AppColors.textSecondary,
+              color: _isPinned ? AppColors.primary : c.textSecondary,
               size: 20,
             ),
           ),
@@ -316,7 +319,7 @@ class _NoteEditScreenState extends ConsumerState<NoteEditScreen>
             onTap: () => setState(() => _isSecure = !_isSecure),
             child: Icon(
               _isSecure ? Icons.shield : Icons.shield_outlined,
-              color: _isSecure ? AppColors.accentOrange : AppColors.textSecondary,
+              color: _isSecure ? AppColors.accentOrange : c.textSecondary,
               size: 20,
             ),
           ),
@@ -326,11 +329,13 @@ class _NoteEditScreenState extends ConsumerState<NoteEditScreen>
             child: Container(
               width: 24,
               height: 24,
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(colors: AppColors.primaryGradient),
+              decoration: const BoxDecoration(
+                gradient:
+                LinearGradient(colors: AppColors.primaryGradient),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.palette_outlined, size: 14, color: Colors.white),
+              child: const Icon(Icons.palette_outlined,
+                  size: 14, color: Colors.white),
             ),
           ),
           const SizedBox(width: 16),
@@ -339,11 +344,15 @@ class _NoteEditScreenState extends ConsumerState<NoteEditScreen>
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                gradient: const LinearGradient(colors: AppColors.primaryGradient),
+                gradient: const LinearGradient(
+                    colors: AppColors.primaryGradient),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: const Text('Save',
-                  style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600)),
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600)),
             ),
           ),
         ],
@@ -351,7 +360,7 @@ class _NoteEditScreenState extends ConsumerState<NoteEditScreen>
     );
   }
 
-  Widget _buildTagsSection() {
+  Widget _buildTagsSection(AppColorsExtension c) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -363,11 +372,13 @@ class _NoteEditScreenState extends ConsumerState<NoteEditScreen>
               return GestureDetector(
                 onTap: () => setState(() => _tags.remove(tag)),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
                     color: AppColors.primary.withOpacity(0.12),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+                    border:
+                    Border.all(color: AppColors.primary.withOpacity(0.3)),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -379,7 +390,8 @@ class _NoteEditScreenState extends ConsumerState<NoteEditScreen>
                             fontWeight: FontWeight.w500,
                           )),
                       const SizedBox(width: 4),
-                      const Icon(Icons.close, size: 12, color: AppColors.primaryLight),
+                      const Icon(Icons.close,
+                          size: 12, color: AppColors.primaryLight),
                     ],
                   ),
                 ),
@@ -393,27 +405,28 @@ class _NoteEditScreenState extends ConsumerState<NoteEditScreen>
             Expanded(
               child: TextField(
                 controller: _tagController,
-                style: const TextStyle(color: AppColors.textPrimary, fontSize: 14),
+                style: TextStyle(color: c.textPrimary, fontSize: 14),
                 decoration: InputDecoration(
                   hintText: 'Add tag...',
-                  hintStyle: const TextStyle(color: AppColors.textMuted),
+                  hintStyle: TextStyle(color: c.textMuted),
                   prefixText: '# ',
                   prefixStyle: const TextStyle(color: AppColors.primary),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: AppColors.darkBorder),
+                    borderSide: BorderSide(color: c.border),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: AppColors.darkBorder),
+                    borderSide: BorderSide(color: c.border),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide: const BorderSide(color: AppColors.primary),
                   ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 10),
                   filled: true,
-                  fillColor: AppColors.darkCard,
+                  fillColor: c.card,
                 ),
                 onSubmitted: (_) => _addTag(),
               ),
@@ -438,9 +451,10 @@ class _NoteEditScreenState extends ConsumerState<NoteEditScreen>
   }
 
   void _showColorPicker() {
+    final c = context.appColors;
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.darkCard,
+      backgroundColor: c.card,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -454,14 +468,14 @@ class _NoteEditScreenState extends ConsumerState<NoteEditScreen>
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: AppColors.darkBorder,
+                color: c.border,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
             const SizedBox(height: 16),
-            const Text('Note Color',
+            Text('Note Color',
                 style: TextStyle(
-                  color: AppColors.textPrimary,
+                  color: c.textPrimary,
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                 )),
@@ -487,12 +501,15 @@ class _NoteEditScreenState extends ConsumerState<NoteEditScreen>
                       ),
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(
-                        color: isSelected ? AppColors.primary : AppColors.darkBorder,
+                        color: isSelected
+                            ? AppColors.primary
+                            : c.border,
                         width: isSelected ? 2 : 1,
                       ),
                     ),
                     child: isSelected
-                        ? const Icon(Icons.check, color: AppColors.primary, size: 20)
+                        ? const Icon(Icons.check,
+                        color: AppColors.primary, size: 20)
                         : null,
                   ),
                 );
@@ -510,6 +527,8 @@ class _NoteEditScreenState extends ConsumerState<NoteEditScreen>
       'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
     ];
-    return '${months[dt.month - 1]} ${dt.day}, ${dt.year} ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+    return '${months[dt.month - 1]} ${dt.day}, ${dt.year} '
+        '${dt.hour.toString().padLeft(2, '0')}:'
+        '${dt.minute.toString().padLeft(2, '0')}';
   }
 }

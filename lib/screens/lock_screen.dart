@@ -5,7 +5,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../services/auth_service.dart';
-import '../services/encryption_service.dart';
 import '../services/providers.dart';
 import '../theme/app_theme.dart';
 import '../widgets/common_widgets.dart';
@@ -23,11 +22,11 @@ class _LockScreenState extends ConsumerState<LockScreen>
   bool _isError = false;
   int _wrongAttempts = 0;
   bool _isLocked = false;
-  bool _showBiometric = false;
   late AnimationController _shakeController;
   late AnimationController _glowController;
 
-  static const int _maxLength = 6;
+  // FIX: 4-digit PIN only
+  static const int _maxLength = 4;
   static const int _maxAttempts = 5;
 
   @override
@@ -41,8 +40,6 @@ class _LockScreenState extends ConsumerState<LockScreen>
       vsync: this,
       duration: const Duration(seconds: 3),
     )..repeat(reverse: true);
-
-    _initBiometric();
   }
 
   @override
@@ -50,27 +47,6 @@ class _LockScreenState extends ConsumerState<LockScreen>
     _shakeController.dispose();
     _glowController.dispose();
     super.dispose();
-  }
-
-  Future<void> _initBiometric() async {
-    final enabled = await EncryptionService.isBiometricEnabled();
-    final available = await AuthService.isBiometricAvailable();
-    setState(() => _showBiometric = enabled && available);
-
-    if (_showBiometric) {
-      await Future.delayed(const Duration(milliseconds: 800));
-      _tryBiometric();
-    }
-  }
-
-  Future<void> _tryBiometric() async {
-    final success = await AuthService.authenticateWithBiometrics();
-    if (success && mounted) {
-      await EncryptionService.setVaultMode(false);
-      ref.read(vaultModeProvider.notifier).state = false;
-      ref.read(isLockedProvider.notifier).state = false;
-      context.go('/home');
-    }
   }
 
   void _onDigit(String digit) {
@@ -150,12 +126,10 @@ class _LockScreenState extends ConsumerState<LockScreen>
                   children: [
                     const SizedBox(height: 40),
 
-                    // Logo with glow
                     _buildGlowLogo(),
 
                     const SizedBox(height: 32),
 
-                    // Title
                     const Text(
                       'VaultTix',
                       style: TextStyle(
@@ -184,33 +158,32 @@ class _LockScreenState extends ConsumerState<LockScreen>
 
                     const SizedBox(height: 48),
 
-                    // PIN dots
                     _buildPinDots(),
 
                     const SizedBox(height: 48),
 
-                    // Numpad
                     if (!_isLocked)
                       NumberPad(
                         onDigitPressed: _onDigit,
                         onDelete: _onDelete,
-                        onBiometric: _tryBiometric,
-                        showBiometric: _showBiometric,
                       ).animate().fadeIn(delay: 400.ms),
 
                     if (_isLocked) ...[
                       const SizedBox(height: 24),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 16),
                         decoration: BoxDecoration(
                           color: AppColors.error.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: AppColors.error.withOpacity(0.3)),
+                          border: Border.all(
+                              color: AppColors.error.withOpacity(0.3)),
                         ),
                         child: const Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.timer_outlined, color: AppColors.error, size: 20),
+                            Icon(Icons.timer_outlined,
+                                color: AppColors.error, size: 20),
                             SizedBox(width: 8),
                             Text('Vault locked for 30 seconds',
                                 style: TextStyle(color: AppColors.error)),
@@ -245,14 +218,15 @@ class _LockScreenState extends ConsumerState<LockScreen>
         width: double.infinity,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.max,
           children: List.generate(_maxLength, (i) {
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10),
               child: PinDot(
                 filled: i < _pin.length,
                 isError: _isError,
-              ).animate(target: i < _pin.length ? 1 : 0).scale(
+              )
+                  .animate(target: i < _pin.length ? 1 : 0)
+                  .scale(
                 begin: const Offset(0.8, 0.8),
                 end: const Offset(1, 1),
                 duration: 200.ms,
