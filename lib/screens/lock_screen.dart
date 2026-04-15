@@ -18,7 +18,7 @@ class LockScreen extends ConsumerStatefulWidget {
 }
 
 class _LockScreenState extends ConsumerState<LockScreen>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   String _pin = '';
   bool _isError = false;
   int _wrongAttempts = 0;
@@ -80,7 +80,7 @@ class _LockScreenState extends ConsumerState<LockScreen>
       _pin += digit;
       _isError = false;
     });
-    if (_pin.length >= 4) {
+    if (_pin.length >= _maxLength) {
       Future.delayed(const Duration(milliseconds: 100), _verifyPin);
     }
   }
@@ -172,8 +172,8 @@ class _LockScreenState extends ConsumerState<LockScreen>
                       _isLocked
                           ? 'Too many attempts. Wait 30s.'
                           : _wrongAttempts > 0
-                              ? 'Wrong PIN (${_maxAttempts - _wrongAttempts} left)'
-                              : 'Enter your PIN to unlock',
+                          ? 'Wrong PIN (${_maxAttempts - _wrongAttempts} left)'
+                          : 'Enter your PIN to unlock',
                       style: TextStyle(
                         color: _isLocked || _wrongAttempts > 0
                             ? AppColors.error
@@ -241,22 +241,26 @@ class _LockScreenState extends ConsumerState<LockScreen>
           child: child,
         );
       },
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: List.generate(_maxLength, (i) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: PinDot(
-              filled: i < _pin.length,
-              isError: _isError,
-            ).animate(target: i < _pin.length ? 1 : 0).scale(
-              begin: const Offset(0.8, 0.8),
-              end: const Offset(1, 1),
-              duration: 200.ms,
-              curve: Curves.easeOutBack,
-            ),
-          );
-        }),
+      child: SizedBox(
+        width: double.infinity,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.max,
+          children: List.generate(_maxLength, (i) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: PinDot(
+                filled: i < _pin.length,
+                isError: _isError,
+              ).animate(target: i < _pin.length ? 1 : 0).scale(
+                begin: const Offset(0.8, 0.8),
+                end: const Offset(1, 1),
+                duration: 200.ms,
+                curve: Curves.easeOutBack,
+              ),
+            );
+          }),
+        ),
       ),
     );
   }
@@ -290,11 +294,11 @@ class _LockScreenState extends ConsumerState<LockScreen>
     )
         .animate()
         .scale(
-          begin: const Offset(0.7, 0.7),
-          end: const Offset(1, 1),
-          duration: 600.ms,
-          curve: Curves.easeOutBack,
-        )
+      begin: const Offset(0.7, 0.7),
+      end: const Offset(1, 1),
+      duration: 600.ms,
+      curve: Curves.easeOutBack,
+    )
         .fadeIn(duration: 400.ms);
   }
 

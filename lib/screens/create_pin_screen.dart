@@ -235,17 +235,21 @@ class _CreatePinScreenState extends State<CreatePinScreen>
                           child: child,
                         );
                       },
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: List.generate(_maxLength, (i) {
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                            child: PinDot(
-                              filled: i < _pin.length,
-                              isError: _isError,
-                            )
-                          );
-                        }),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.max,
+                          children: List.generate(_maxLength, (i) {
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                              child: PinDot(
+                                filled: i < _pin.length,
+                                isError: _isError,
+                              ),
+                            );
+                          }),
+                        ),
                       ),
                     ),
 

@@ -137,31 +137,31 @@ class _GradientButtonState extends State<GradientButton>
           child: Center(
             child: widget.isLoading
                 ? const SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(
-                      color: Colors.white,
-                      strokeWidth: 2,
-                    ),
-                  )
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(
+                color: Colors.white,
+                strokeWidth: 2,
+              ),
+            )
                 : Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (widget.icon != null) ...[
-                        widget.icon!,
-                        const SizedBox(width: 8),
-                      ],
-                      Text(
-                        widget.text,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.3,
-                        ),
-                      ),
-                    ],
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (widget.icon != null) ...[
+                  widget.icon!,
+                  const SizedBox(width: 8),
+                ],
+                Text(
+                  widget.text,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.3,
                   ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -188,26 +188,24 @@ class PinDot extends StatelessWidget {
         color: isError
             ? AppColors.error
             : filled
-                ? AppColors.primary
-                : Colors.transparent,
+            ? AppColors.primary
+            : Colors.transparent,
         border: Border.all(
           color: isError
               ? AppColors.error
               : filled
-                  ? AppColors.primary
-                  : AppColors.textMuted,
+              ? AppColors.primary
+              : AppColors.textMuted,
           width: 2,
         ),
-        boxShadow: filled
-            ? [
-                BoxShadow(
-                  color: isError
-                      ? AppColors.error.withOpacity(0.5)
-                      : AppColors.primary.withOpacity(0.5),
-                  blurRadius: 8,
-                )
-              ]
-            : null,
+        boxShadow: [
+          BoxShadow(
+            color: isError
+                ? AppColors.error.withOpacity(filled ? 0.5 : 0.0)
+                : AppColors.primary.withOpacity(filled ? 0.5 : 0.0),
+            blurRadius: filled ? 8 : 0,
+          ),
+        ],
       ),
     );
   }
@@ -262,20 +260,20 @@ class NumberPad extends StatelessWidget {
         height: 72,
         child: showBiometric
             ? GestureDetector(
-                onTap: onBiometric,
-                child: Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: AppColors.darkCardElevated,
-                    border: Border.all(color: AppColors.darkBorder),
-                  ),
-                  child: const Icon(
-                    Icons.fingerprint,
-                    color: AppColors.primary,
-                    size: 32,
-                  ),
-                ),
-              )
+          onTap: onBiometric,
+          child: Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.darkCardElevated,
+              border: Border.all(color: AppColors.darkBorder),
+            ),
+            child: const Icon(
+              Icons.fingerprint,
+              color: AppColors.primary,
+              size: 32,
+            ),
+          ),
+        )
             : const SizedBox.shrink(),
       );
     }
