@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lottie/lottie.dart';
 import '../services/encryption_service.dart';
 import '../theme/app_theme.dart';
 
@@ -131,8 +132,37 @@ class _SplashScreenState extends State<SplashScreen>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Logo
-                _buildLogo(),
+                // Lottie Lock Animation with glow
+                AnimatedBuilder(
+                  animation: _glowController,
+                  builder: (_, child) => Container(
+                    width: 130,
+                    height: 130,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(30),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primary
+                              .withOpacity(0.3 + _glowController.value * 0.3),
+                          blurRadius: 30 + _glowController.value * 20,
+                          spreadRadius: 4,
+                        ),
+                      ],
+                    ),
+                    child: child,
+                  ),
+
+                  child: Lottie.asset(
+                    'assets/lock.json',
+                    width: 130,
+                    height: 130,
+                    fit: BoxFit.contain,
+                    repeat: true,
+                  ),
+                )
+                    .animate()
+                    .scale(begin: const Offset(0.5, 0.5), duration: 800.ms, curve: Curves.easeOutBack)
+                    .fadeIn(duration: 600.ms),
                 const SizedBox(height: 28),
 
                 // App name
@@ -176,72 +206,12 @@ class _SplashScreenState extends State<SplashScreen>
           ),
 
           // Bottom version
-          Positioned(
-            bottom: 48,
-            left: 0,
-            right: 0,
-            child: Text(
-              'v1.0.0 · End-to-End Encrypted',
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: AppColors.textMuted,
-                fontSize: 12,
-              ),
-            )
-                .animate()
-                .fadeIn(delay: 1500.ms, duration: 600.ms),
-          ),
+
         ],
       ),
     );
   }
 
-  Widget _buildLogo() {
-    return AnimatedBuilder(
-      animation: _glowController,
-      builder: (context, child) {
-        return Container(
-          width: 100,
-          height: 100,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: AppColors.primaryGradient,
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(28),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.primary
-                    .withOpacity(0.3 + _glowController.value * 0.3),
-                blurRadius: 30 + _glowController.value * 20,
-                spreadRadius: 5,
-              ),
-              BoxShadow(
-                color: AppColors.accent
-                    .withOpacity(0.1 + _glowController.value * 0.15),
-                blurRadius: 50,
-                spreadRadius: 10,
-              ),
-            ],
-          ),
-          child: const Icon(
-            Icons.lock_rounded,
-            color: Colors.white,
-            size: 48,
-          ),
-        );
-      },
-    )
-        .animate()
-        .scale(
-          begin: const Offset(0.5, 0.5),
-          end: const Offset(1, 1),
-          duration: 800.ms,
-          curve: Curves.easeOutBack,
-        )
-        .fadeIn(duration: 600.ms);
-  }
 
   Widget _buildLoadingBar() {
     return SizedBox(

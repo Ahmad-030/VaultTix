@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lottie/lottie.dart';
 import '../theme/app_theme.dart';
 import '../widgets/common_widgets.dart';
 
@@ -70,28 +71,31 @@ class _AboutScreenState extends State<AboutScreen>
 
               const SizedBox(height: 48),
 
-              // Logo section
+              // Lottie Lock Animation with glow
               AnimatedBuilder(
                 animation: _glowController,
                 builder: (_, child) => Container(
-                  width: 110,
-                  height: 110,
+                  width: 130,
+                  height: 130,
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: AppColors.primaryGradient,
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
                     borderRadius: BorderRadius.circular(30),
                     boxShadow: [
                       BoxShadow(
                         color: AppColors.primary
                             .withOpacity(0.3 + _glowController.value * 0.3),
                         blurRadius: 30 + _glowController.value * 20,
+                        spreadRadius: 4,
                       ),
                     ],
                   ),
-                  child: const Icon(Icons.lock_rounded, color: Colors.white, size: 52),
+                  child: child,
+                ),
+                child: Lottie.asset(
+                  'assets/lock.json',
+                  width: 130,
+                  height: 130,
+                  fit: BoxFit.contain,
+                  repeat: true,
                 ),
               )
                   .animate()
@@ -120,20 +124,6 @@ class _AboutScreenState extends State<AboutScreen>
                 'Smart security for your private world',
                 style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
               ).animate().fadeIn(delay: 400.ms),
-
-              const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: AppColors.primary.withOpacity(0.3)),
-                ),
-                child: const Text(
-                  'v1.0.0',
-                  style: TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.w600),
-                ),
-              ).animate().fadeIn(delay: 500.ms),
 
               const SizedBox(height: 40),
 

@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lottie/lottie.dart';
 import '../services/auth_service.dart';
 import '../services/providers.dart';
 import '../theme/app_theme.dart';
@@ -126,7 +127,36 @@ class _LockScreenState extends ConsumerState<LockScreen>
                   children: [
                     const SizedBox(height: 40),
 
-                    _buildGlowLogo(),
+                    // Lottie Lock Animation with glow
+                    AnimatedBuilder(
+                      animation: _glowController,
+                      builder: (_, child) => Container(
+                        width: 130,
+                        height: 130,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(30),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.primary
+                                  .withOpacity(0.3 + _glowController.value * 0.3),
+                              blurRadius: 30 + _glowController.value * 20,
+                              spreadRadius: 4,
+                            ),
+                          ],
+                        ),
+                        child: child,
+                      ),
+                      child: Lottie.asset(
+                        'assets/lock.json',
+                        width: 130,
+                        height: 130,
+                        fit: BoxFit.contain,
+                        repeat: true,
+                      ),
+                    )
+                        .animate()
+                        .scale(begin: const Offset(0.5, 0.5), duration: 800.ms, curve: Curves.easeOutBack)
+                        .fadeIn(duration: 600.ms),
 
                     const SizedBox(height: 32),
 
@@ -239,42 +269,6 @@ class _LockScreenState extends ConsumerState<LockScreen>
     );
   }
 
-  Widget _buildGlowLogo() {
-    return AnimatedBuilder(
-      animation: _glowController,
-      builder: (context, child) {
-        return Container(
-          width: 88,
-          height: 88,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: AppColors.primaryGradient,
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.primary
-                    .withOpacity(0.3 + _glowController.value * 0.25),
-                blurRadius: 25 + _glowController.value * 15,
-                spreadRadius: 2,
-              ),
-            ],
-          ),
-          child: const Icon(Icons.lock_rounded, color: Colors.white, size: 42),
-        );
-      },
-    )
-        .animate()
-        .scale(
-      begin: const Offset(0.7, 0.7),
-      end: const Offset(1, 1),
-      duration: 600.ms,
-      curve: Curves.easeOutBack,
-    )
-        .fadeIn(duration: 400.ms);
-  }
 
   Widget _buildBackground() {
     return Positioned.fill(
